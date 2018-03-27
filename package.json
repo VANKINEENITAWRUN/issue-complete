@@ -7,16 +7,23 @@
   "repository": "https://github.com/szeck87/issue-complete.git",
   "scripts": {
     "start": "probot run ./index.js",
-    "test": "jest && standard"
+    "test": "npm run lint && jest",
+    "lint": "tslint index.ts"
   },
   "dependencies": {
-    "probot": "^6.1.0",
-    "probot-config": "^0.1.0"
+    "probot-config": "^0.1.0",
+    "probot-ts": "^6.1.0-ts"
   },
   "devDependencies": {
+    "@types/jest": "^22.2.2",
+    "@types/node": "^9.6.0",
     "jest": "^22.4.3",
     "smee-client": "^1.0.1",
-    "standard": "^11.0.1"
+    "standard": "^11.0.1",
+    "ts-jest": "^22.4.2",
+    "tslint": "^5.9.1",
+    "tslint-microsoft-contrib": "^5.0.3",
+    "typescript": "^2.7.2"
   },
   "engines": {
     "node": "8.x",
