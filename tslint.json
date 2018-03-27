@@ -115,7 +115,7 @@
         ],
         "max-line-length": [
             true,
-            140
+            175
         ],
         "member-access": true,
         "member-ordering": [
@@ -181,7 +181,7 @@
         "no-missing-visibility-modifiers": false,
         "no-misused-new": true,
         "no-multiline-string": [
-            true
+            false
         ],
         "no-multiple-var-decl": true,
         "no-namespace": false,
