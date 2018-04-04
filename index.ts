@@ -25,6 +25,18 @@ const addComment = `
   }
 `;
 
+const getLabelInRepo = `
+  query getLabelInRepo($url: URI!, $name: String!) {
+    resource(url: $url) {
+      ... on Repository {
+        label(name: $name) {
+          name
+        }
+      }
+    }
+  }
+`;
+
 export const robot = (robot: Robot) => {
   robot.on(["issues.opened", "issues.edited", "issues.reopened"], async (context: Context) => {
     const config = await getConfig(context, "issuecomplete.yml", defaultConfig);
@@ -79,7 +91,10 @@ export const robot = (robot: Robot) => {
 
   async function createLabelIfNotExists (context: Context, labelName: string, labelColor: string): Promise<any> {
     const {owner, repo} = context.repo();
-    return context.github.issues.getLabel({owner, repo, name: labelName}).catch(() => {
+    return context.github.query(getLabelInRepo, {
+      url: context.payload.repostiory.html_url,
+      name: labelName
+    }).catch(() => {
       return context.github.issues.createLabel({owner, repo, name: labelName, color: labelColor});
     });
   }
