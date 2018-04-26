@@ -9,7 +9,8 @@
         "target": "es6",
         "declaration": true,
         "moduleResolution": "node",
-        "outDir": "./"
+        "outDir": "dist",
+        "baseUrl": "."
     },
     "exclude": [
         "node_modules",
