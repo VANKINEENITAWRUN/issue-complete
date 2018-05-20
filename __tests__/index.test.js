@@ -1,6 +1,6 @@
 // Requiring probot allows us to mock out a robot instance
 const {createRobot} = require('probot')
-const app = require('../index.js')
+const app = require('./dist/index.js')
 const issueOpenedWithUnchecked = require('./fixtures/issueOpenedWithUnchecked')
 const issueOpenedMissingKeywords = require('./fixtures/issueOpenedMissingKeywords')
 const issueReopenedIncomplete = require('./fixtures/issueReopenedIncomplete')

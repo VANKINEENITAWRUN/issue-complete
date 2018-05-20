@@ -37,7 +37,7 @@ export const robot = (robot: Robot) => {
     const configBuilder = new ConfigBuilder();
     const issueBodyChecker = new IssueBodyChecker();
     const config = await configBuilder.getValidConfig(context);
-    const { resource } = await context.github.query(getResource, {
+    const resource = await context.github.query(getResource, {
       url: context.payload.issue.html_url
     });
     const body = context.payload.issue.body;

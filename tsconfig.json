@@ -9,10 +9,10 @@
         "target": "es6",
         "declaration": true,
         "moduleResolution": "node",
-        "outDir": "dist",
-        "baseUrl": "."
+        "outDir": "dist"
     },
     "exclude": [
-        "node_modules",
+      "./node_modules",
+      "./dist/"
     ]
 }
