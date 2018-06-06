@@ -1,7 +1,5 @@
-import { Context } from "probot";
-
 export default class IssueBodyChecker {
-  public async isBodyValid (body: string, config: any, context: Context) {
+  public async isBodyValid (body: string, config: any) {
     if (!body) {
       return false;
     }

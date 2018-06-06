@@ -41,7 +41,7 @@ export const robot = (robot: Robot) => {
       url: context.payload.issue.html_url
     });
     const body = context.payload.issue.body;
-    if (!(await issueBodyChecker.isBodyValid(body, config, context))) {
+    if (!(await issueBodyChecker.isBodyValid(body, config))) {
       await addLabelToIssue(context, config);
       if (context.payload.action !== "edited") {
         await addCommentToIssue(context, config, resource);
@@ -74,7 +74,6 @@ export const robot = (robot: Robot) => {
   }
 
   async function addCommentToIssue (context: Context, config: any, resource: any) {
-    const commentText = context.issue({body: config.commentText});
     return context.github.query(addComment, {
       id: resource.id,
       body: config.commentText

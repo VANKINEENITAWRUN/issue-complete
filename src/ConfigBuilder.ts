@@ -1,5 +1,4 @@
-import { Robot, Context } from "probot";
-const getConfig = require("probot-config");
+import { Context } from "probot";
 
 const defaultConfig = {
   labelName: "waiting-for-user-information",
@@ -9,7 +8,7 @@ const defaultConfig = {
 
 export default class ConfigBuilder {
   public async getValidConfig (context: Context) {
-    const repoConfig = await getConfig(context, "issuecomplete.yml", defaultConfig);
+    const repoConfig = await context.config("issuecomplete.yml", defaultConfig);
     return this.buildConfig(context, repoConfig);
   }
 
