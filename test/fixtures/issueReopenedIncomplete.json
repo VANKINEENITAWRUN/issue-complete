@@ -1,12 +1,13 @@
 {
   "event": "issues",
   "payload": {
-    "action": "edited",
+    "action": "reopened",
     "issue": {
       "title": "Test With No Checkboxes Filled",
       "user": {
         "login": "szeck87"
       },
+      "html_url": "https://github.com/szeck87/bot-testing/issues/35",
       "labels": [
         {
           "id": 868485507,
@@ -16,7 +17,7 @@
           "default": false
         }
       ],
-      "body": "- [X] Task 1\r\n- [X] Task 2\r\n- [X] Task 3\r\ngist\nrecreate"
+      "body": "- [ ] Task 1\r\n- [X] Task 2\r\n- [X] task 3\r\n"
     },
     "repository": {
       "name": "bot-testing",

@@ -1,19 +1,9 @@
-import { Robot, Context } from "probot";
-import ConfigBuilder from "./ConfigBuilder";
-import IssueBodyChecker from "./IssueBodyChecker";
-
-const getResource = `
-  query getResource($url: URI!) {
-    resource(url: $url) {
-      ... on Node {
-        id
-      }
-    }
-  }
-`;
+import { Application, Context } from "probot";
+import getValidConfig from "./ConfigBuilder";
+import isBodyValid from "./IssueBodyChecker";
 
 const addComment = `
-  mutation comment($id: ID!, $body: String!) {
+  mutation($id: ID!, $body: String!) {
     addComment(input: {subjectId: $id, body: $body}) {
       clientMutationId
     }
@@ -21,30 +11,24 @@ const addComment = `
 `;
 
 const getLabelInRepo = `
-  query getLabelInRepo($url: URI!, $name: String!) {
-    resource(url: $url) {
-      ... on Repository {
-        label(name: $name) {
-          name
-        }
+  query($owner: String!, $name: String!, $labelName: String!) {
+    repository(name: $name, owner: $owner) {
+      label(name: $labelName) {
+        name
       }
     }
   }
 `;
 
-export const robot = (robot: Robot) => {
-  robot.on(["issues.opened", "issues.edited", "issues.reopened"], async context => {
-    const configBuilder = new ConfigBuilder();
-    const issueBodyChecker = new IssueBodyChecker();
-    const config = await configBuilder.getValidConfig(context);
-    const resource = await context.github.query(getResource, {
-      url: context.payload.issue.html_url
-    });
+// export const app = (app: Application) => {
+export = (app: Application) => {
+  app.on(["issues.opened", "issues.edited", "issues.reopened"], async (context: Context) => {
+    const config = await getValidConfig(context);
     const body = context.payload.issue.body;
-    if (!(await issueBodyChecker.isBodyValid(body, config))) {
+    if (!(await isBodyValid(body, config))) {
       await addLabelToIssue(context, config);
       if (context.payload.action !== "edited") {
-        await addCommentToIssue(context, config, resource);
+        await addCommentToIssue(context, config);
       }
     } else {
       await removeLabelFromIssue(context, config);
@@ -52,13 +36,17 @@ export const robot = (robot: Robot) => {
   });
 
   async function createLabelIfNotExists (context: Context, labelName: string, labelColor: string) {
+    // tslint:disable
     const {owner, repo} = context.repo();
-    return context.github.query(getLabelInRepo, {
-      url: context.payload.repository.html_url,
-      name: labelName
-    }).catch(() => {
-      return context.github.issues.createLabel({owner, repo, name: labelName, color: labelColor});
+    const doesLabelExist = await context.github.query(getLabelInRepo, {
+      owner,
+      name: repo,
+      labelName: labelName
     });
+    context.log(doesLabelExist);
+    // catch(error => {
+    //   return context.github.issues.createLabel({owner, repo, name: labelName, color: labelColor});
+    // });
   }
 
   async function addLabelToIssue (context: Context, config: any) {
@@ -73,12 +61,12 @@ export const robot = (robot: Robot) => {
     return context.github.issues.removeLabel(labelRemoval);
   }
 
-  async function addCommentToIssue (context: Context, config: any, resource: any) {
+  async function addCommentToIssue (context: Context, config: any) {
     return context.github.query(addComment, {
-      id: resource.id,
+      id: context.payload.issue.node_id,
       body: config.commentText
     });
   }
 };
 
-export default robot;
+// export default app;
