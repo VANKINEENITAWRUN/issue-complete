@@ -9,12 +9,8 @@ export default async function isBodyValid (body: string, config: any) {
   }
 
   if (config.keywords) {
-    config.keywords.forEach((keyword: string) => {
-      if (body.indexOf(keyword) === -1) {
-        return false;
-      } else {
-        return true;
-      }
+    return config.keywords.every((key: string) => {
+      return body.indexOf(key) > -1;
     });
   }
 

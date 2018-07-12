@@ -1,9 +1,8 @@
 // Requiring probot allows us to mock out a robot instance
 // tslint:disable:mocha-no-side-effect-code
 import { Application } from "probot";
-// import { app as issueComplete } from "../src/index";
-// import { addComment, getLabelInRepo } from "../src/index";
-const issueComplete = require("../src/index");
+import { app as issueComplete } from "../src/index";
+// const issueComplete = require("../src/index");
 const issueOpenedWithUnchecked = require("./fixtures/issueOpenedWithUnchecked");
 const issueOpenedMissingKeywords = require("./fixtures/issueOpenedMissingKeywords");
 const issueReopenedIncomplete = require("./fixtures/issueReopenedIncomplete");
@@ -45,7 +44,7 @@ describe("issues are incomplete", () => {
       path: ".github/issuecomplete.yml"
     });
     expect(github.issues.addLabels).toHaveBeenCalled();
-    expect(github.query).toHaveBeenCalled();
+    expect(github.issues.createComment).toHaveBeenCalled();
   });
 
   test("missing keywords, adds a label and comment to a newly opened issue", async () => {
@@ -91,7 +90,7 @@ describe("issues are complete", () => {
       path: ".github/issuecomplete.yml"
     });
     expect(github.issues.addLabels).not.toHaveBeenCalled();
-    // expect(github.issues.createComment).not.toHaveBeenCalled();
+    expect(github.issues.createComment).not.toHaveBeenCalled();
   });
 
   test("boxes checked and has keywords, removes label to updated issue", async () => {
@@ -107,6 +106,6 @@ describe("issues are complete", () => {
       name: "waiting-for-user-information"
     });
     expect(github.issues.addLabels).not.toHaveBeenCalled();
-    // expect(github.query(addComment)).not.toHaveBeenCalled();
+    expect(github.issues.createComment).not.toHaveBeenCalled();
   });
 });

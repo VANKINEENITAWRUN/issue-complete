@@ -2,30 +2,30 @@ import { Application, Context } from "probot";
 import getValidConfig from "./ConfigBuilder";
 import isBodyValid from "./IssueBodyChecker";
 
-const addComment = `
-  mutation($id: ID!, $body: String!) {
-    addComment(input: {subjectId: $id, body: $body}) {
-      clientMutationId
-    }
-  }
-`;
+// const addComment = `
+//   mutation($id: ID!, $body: String!) {
+//     addComment(input: {subjectId: $id, body: $body}) {
+//       clientMutationId
+//     }
+//   }
+// `;
 
-const getLabelInRepo = `
-  query($owner: String!, $name: String!, $labelName: String!) {
-    repository(name: $name, owner: $owner) {
-      label(name: $labelName) {
-        name
-      }
-    }
-  }
-`;
+// const getLabelInRepo = `
+//   query($owner: String!, $name: String!, $labelName: String!) {
+//     repository(name: $name, owner: $owner) {
+//       label(name: $labelName) {
+//         name
+//       }
+//     }
+//   }
+// `;
 
-// export const app = (app: Application) => {
-export = (app: Application) => {
+export const app = (app: Application) => {
   app.on(["issues.opened", "issues.edited", "issues.reopened"], async (context: Context) => {
     const config = await getValidConfig(context);
-    const body = context.payload.issue.body;
-    if (!(await isBodyValid(body, config))) {
+    const body: string = context.payload.issue.body;
+    const isValid: boolean = await isBodyValid(body, config);
+    if (!isValid) {
       await addLabelToIssue(context, config);
       if (context.payload.action !== "edited") {
         await addCommentToIssue(context, config);
@@ -36,17 +36,15 @@ export = (app: Application) => {
   });
 
   async function createLabelIfNotExists (context: Context, labelName: string, labelColor: string) {
-    // tslint:disable
     const {owner, repo} = context.repo();
-    const doesLabelExist = await context.github.query(getLabelInRepo, {
-      owner,
-      name: repo,
-      labelName: labelName
-    });
-    context.log(doesLabelExist);
-    // catch(error => {
-    //   return context.github.issues.createLabel({owner, repo, name: labelName, color: labelColor});
+    // const doesLabelExist = await context.github.query(getLabelInRepo, {
+    //   owner,
+    //   name: repo,
+    //   labelName: labelName
     // });
+    return context.github.issues.getLabel({owner, repo, name: labelName}).catch(() => {
+      return context.github.issues.createLabel({owner, repo, name: labelName, color: labelColor});
+    });
   }
 
   async function addLabelToIssue (context: Context, config: any) {
@@ -62,11 +60,13 @@ export = (app: Application) => {
   }
 
   async function addCommentToIssue (context: Context, config: any) {
-    return context.github.query(addComment, {
-      id: context.payload.issue.node_id,
-      body: config.commentText
-    });
+    const commentText = context.issue({body: config.commentText});
+    return context.github.issues.createComment(commentText);
+    // return context.github.query(addComment, {
+    //   id: context.payload.issue.node_id,
+    //   body: config.commentText
+    // });
   }
 };
 
-// export default app;
+export default app;
