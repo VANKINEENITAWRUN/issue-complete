@@ -1,8 +1,7 @@
 // Requiring probot allows us to mock out a robot instance
 // tslint:disable:mocha-no-side-effect-code
 import { Application } from "probot";
-import { app as issueComplete } from "../src/index";
-// const issueComplete = require("../src/index");
+const issueComplete = require("../src/index");
 const issueOpenedWithUnchecked = require("./fixtures/issueOpenedWithUnchecked");
 const issueOpenedMissingKeywords = require("./fixtures/issueOpenedMissingKeywords");
 const issueReopenedIncomplete = require("./fixtures/issueReopenedIncomplete");
@@ -30,7 +29,13 @@ beforeEach(() => {
       addLabels: jest.fn(),
       getLabel: jest.fn().mockImplementation(() => Promise.reject(new Error()))
     },
-    query: jest.fn()
+    query: jest.fn(() => Promise.resolve({
+      repository: {
+        label: {
+          name: "waiting-for-user-information"
+        }
+      }
+    }))
   };
   app.auth = () => Promise.resolve(github);
 });
