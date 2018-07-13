@@ -2,7 +2,7 @@ import { Application, Context } from "probot";
 import getValidConfig from "./ConfigBuilder";
 import isBodyValid from "./IssueBodyChecker";
 
-const addComment = `
+const ADD_COMMENT = `
   mutation($id: ID!, $body: String!) {
     addComment(input: {subjectId: $id, body: $body}) {
       clientMutationId
@@ -10,7 +10,7 @@ const addComment = `
   }
 `;
 
-const getLabelInRepo = `
+const GET_LABEL_IN_REPO = `
   query($owner: String!, $name: String!, $labelName: String!) {
     repository(name: $name, owner: $owner) {
       label(name: $labelName) {
@@ -20,8 +20,8 @@ const getLabelInRepo = `
   }
 `;
 
-// export const app = (app: Application) => {
 export = (app: Application) => {
+  app.log("Issue Complete loaded");
   app.on(["issues.opened", "issues.edited", "issues.reopened"], async (context: Context) => {
     const config = await getValidConfig(context);
     const body: string = context.payload.issue.body;
@@ -38,15 +38,17 @@ export = (app: Application) => {
 
   async function createLabelIfNotExists (context: Context, labelName: string, labelColor: string) {
     const {owner, repo} = context.repo();
-    const doesLabelExist = await context.github.query(getLabelInRepo, {
+    const labelQuery: any = await context.github.query(GET_LABEL_IN_REPO, {
       owner,
       name: repo,
       labelName: labelName
     });
-    context.log({doesLabelExist});
-    return context.github.issues.getLabel({owner, repo, name: labelName}).catch(() => {
+    const result = labelQuery.repository.label;
+    context.log(result);
+    if (result && (result.name !== labelName)) {
       return context.github.issues.createLabel({owner, repo, name: labelName, color: labelColor});
-    });
+    }
+    return;
   }
 
   async function addLabelToIssue (context: Context, config: any) {
@@ -62,14 +64,9 @@ export = (app: Application) => {
   }
 
   async function addCommentToIssue (context: Context, config: any) {
-    const commentText = context.issue({body: config.commentText});
-    return context.github.issues.createComment(commentText);
-    const comment = context.github.query(addComment, {
+    return context.github.query(ADD_COMMENT, {
       id: context.payload.issue.node_id,
       body: config.commentText
     });
-    context.log(comment);
   }
 };
-
-// export default app;
