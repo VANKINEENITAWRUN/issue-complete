@@ -1,7 +1,8 @@
 // Requiring probot allows us to mock out a robot instance
 // tslint:disable:mocha-no-side-effect-code
 import { Application } from "probot";
-const issueComplete = require("../src/index");
+// const issueComplete = require("../src/index");
+import issueComplete, { ADD_COMMENT, GET_LABEL_IN_REPO } from "../src/index";
 const issueOpenedWithUnchecked = require("./fixtures/issueOpenedWithUnchecked");
 const issueOpenedMissingKeywords = require("./fixtures/issueOpenedMissingKeywords");
 const issueReopenedIncomplete = require("./fixtures/issueReopenedIncomplete");
@@ -49,7 +50,7 @@ describe("issues are incomplete", () => {
       path: ".github/issuecomplete.yml"
     });
     expect(github.issues.addLabels).toHaveBeenCalled();
-    expect(github.issues.createComment).toHaveBeenCalled();
+    expect(github.query.mock.calls[1][0]).toEqual(ADD_COMMENT);
   });
 
   test("missing keywords, adds a label and comment to a newly opened issue", async () => {
@@ -60,7 +61,7 @@ describe("issues are incomplete", () => {
       path: ".github/issuecomplete.yml"
     });
     expect(github.issues.addLabels).toHaveBeenCalled();
-    expect(github.issues.createComment).toHaveBeenCalled();
+    expect(github.query.mock.calls[1][0]).toEqual(ADD_COMMENT);
   });
 
   test("unchecked boxes and missing keywords, adds a label and comment to a reopened issue", async () => {
@@ -71,7 +72,8 @@ describe("issues are incomplete", () => {
       path: ".github/issuecomplete.yml"
     });
     expect(github.issues.addLabels).toHaveBeenCalled();
-    expect(github.issues.createComment).toHaveBeenCalled();
+    expect(github.query.mock.calls[0][0]).toEqual(GET_LABEL_IN_REPO);
+    expect(github.query.mock.calls[1][0]).toEqual(ADD_COMMENT);
   });
 
   test("does not comment on updated issue with no checkboxes filled", async () => {
@@ -82,7 +84,8 @@ describe("issues are incomplete", () => {
       path: ".github/issuecomplete.yml"
     });
     expect(github.issues.addLabels).toHaveBeenCalled();
-    expect(github.issues.createComment).not.toHaveBeenCalled();
+    expect(github.query.mock.calls[0][0]).toEqual(GET_LABEL_IN_REPO);
+    expect(github.query.mock.calls[0][0]).not.toEqual(ADD_COMMENT);
   });
 });
 
@@ -95,7 +98,7 @@ describe("issues are complete", () => {
       path: ".github/issuecomplete.yml"
     });
     expect(github.issues.addLabels).not.toHaveBeenCalled();
-    expect(github.issues.createComment).not.toHaveBeenCalled();
+    expect(github.query).not.toHaveBeenCalled();
   });
 
   test("boxes checked and has keywords, removes label to updated issue", async () => {
@@ -110,7 +113,6 @@ describe("issues are complete", () => {
       repo: "bot-testing",
       name: "waiting-for-user-information"
     });
-    expect(github.issues.addLabels).not.toHaveBeenCalled();
-    expect(github.issues.createComment).not.toHaveBeenCalled();
+    expect(github.query).not.toHaveBeenCalled();
   });
 });
